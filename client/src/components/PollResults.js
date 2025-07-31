@@ -1,29 +1,55 @@
-// client/src/components/PollResults.js
+import React, { useEffect, useState } from 'react';
+import { useSocket } from '../context/SocketContext';
 import './PollResults.css';
 
-const PollResults = ({ options, totalVotes }) => {
-  // Calculate total votes if not provided
-  const calculatedTotal = totalVotes || 
-    options.reduce((sum, option) => sum + option.votes, 0);
+const PollResults = ({ options: initialOptions, pollId }) => {
+  const socket = useSocket();           // ✅ pull in the socket instance
+  const [options, setOptions] = useState(initialOptions);
+
+  // Calculate total votes
+  const totalVotes = options.reduce((sum, opt) => sum + opt.votes, 0);
+
+  useEffect(() => {
+    if (!socket || !pollId) return;
+
+    // Join the room for this poll
+    socket.emit('joinPoll', pollId);
+
+    // Listen for updates
+    socket.on('voteUpdate', (updatedPoll) => {
+      // updatedPoll should be the full poll object
+      if (updatedPoll.options) {
+        setOptions(updatedPoll.options);
+      }
+    });
+
+    // Cleanup on unmount
+    return () => {
+      socket.off('voteUpdate');
+      socket.emit('leavePoll', pollId);
+    };
+  }, [socket, pollId]);
 
   return (
     <div className="results-container">
       <ul className="results-list">
-        {options.map((option, index) => {
-          const percentage = calculatedTotal > 0 
-            ? Math.round((option.votes / calculatedTotal) * 100) 
+        {options.map((option, idx) => {
+          const pct = totalVotes > 0
+            ? Math.round((option.votes / totalVotes) * 100)
             : 0;
-            
+
           return (
-            <li key={index} className="result-item">
+            <li key={idx} className="result-item">
               <div className="option-info">
                 <span className="option-text">{option.text}</span>
-                <span className="vote-count">{option.votes} votes ({percentage}%)</span>
+                <span className="vote-count">
+                  {option.votes} votes ({pct}%)
+                </span>
               </div>
               <div className="progress-bar-container">
-                <div 
-                  className="progress-bar" 
-                  style={{ width: `${percentage}%` }}
+                <div
+                  className="progress-bar"
+                  style={{ width: `${pct}%` }}
                 ></div>
               </div>
             </li>
