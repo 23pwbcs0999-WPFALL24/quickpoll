@@ -1,0 +1,126 @@
+.results-container {
+  width: 100%;
+}
+
+.results-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.result-item {
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 16px;
+  padding: 1.5rem;
+  border: 1px solid rgba(102, 126, 234, 0.1);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.result-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.15);
+  border-color: rgba(102, 126, 234, 0.2);
+}
+
+.option-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.option-text {
+  font-weight: 600;
+  color: #2d3748;
+  font-size: 1.1rem;
+  flex: 1;
+  min-width: 200px;
+}
+
+.vote-count {
+  color: #667eea;
+  font-weight: 600;
+  font-size: 0.95rem;
+  background: rgba(102, 126, 234, 0.1);
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+.progress-bar-container {
+  width: 100%;
+  height: 12px;
+  background: rgba(102, 126, 234, 0.1);
+  border-radius: 6px;
+  overflow: hidden;
+  position: relative;
+}
+
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+  border-radius: 6px;
+  transition: width 0.8s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.progress-bar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .result-item {
+    padding: 1.25rem;
+  }
+  
+  .option-info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+  
+  .option-text {
+    min-width: auto;
+    width: 100%;
+  }
+  
+  .vote-count {
+    align-self: flex-end;
+  }
+}
+
+@media (max-width: 480px) {
+  .result-item {
+    padding: 1rem;
+  }
+  
+  .option-text {
+    font-size: 1rem;
+  }
+  
+  .vote-count {
+    font-size: 0.9rem;
+    padding: 0.4rem 0.8rem;
+  }
+}
