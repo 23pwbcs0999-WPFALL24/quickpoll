@@ -1,14 +1,8 @@
+// helpers/tokenGenerator.js
+const { v4: uuidv4 } = require('uuid');
+
 function generateTokens(count) {
-  const tokens = [];
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  for (let i = 0; i < count; i++) {
-    let token = '';
-    for (let j = 0; j < 8; j++) {
-      token += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    tokens.push(token);
-  }
-  return tokens;
+  return Array.from({ length: count }, () => uuidv4());
 }
 
 module.exports = { generateTokens };

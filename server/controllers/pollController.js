@@ -1,6 +1,6 @@
 const { v4: uuidv4 } = require('uuid');
 const Poll = require('../models/Poll');
-const generateTokens = require('../utils/tokenGenerator'); // Import token generator
+const generateTokens = require('/utils/tokenGenerator'); // Import token generator
 
 // CREATE POLL
 exports.createPoll = async (req, res) => {
