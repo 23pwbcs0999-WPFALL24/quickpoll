@@ -43,3 +43,11 @@
   padding-top: 1.5rem;
   margin-top: 2rem;
 }
+.checkbox-label {
+  display: block;
+  margin-top: 1rem;
+  font-weight: 500;
+}
+.checkbox-label input {
+  margin-right: 0.5rem;
+}

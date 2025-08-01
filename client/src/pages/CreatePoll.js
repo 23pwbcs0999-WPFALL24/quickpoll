@@ -11,6 +11,11 @@ export default function CreatePoll() {
   const [copied, setCopied] = useState(false);
   const [copiedCode, setCopiedCode] = useState(false);
 
+  // ✅ New: settings states
+  const [ipRestriction, setIpRestriction] = useState(false);
+  const [tokenVoting, setTokenVoting] = useState(false);
+  const [tokenCount, setTokenCount] = useState(10);
+
   const handleOptionChange = (idx, value) => {
     const newOptions = [...options];
     newOptions[idx] = value;
@@ -22,7 +27,15 @@ export default function CreatePoll() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await createPoll({ question, options });
+      const res = await createPoll({
+        question,
+        options,
+        settings: {
+          ipRestriction,
+          tokenVoting,
+          tokenCount: tokenVoting ? tokenCount : 0,
+        }
+      });
       const pollId = res.data.pollId;
       const link = `${window.location.origin}/poll/${pollId}`;
       setPollLink(link);
@@ -58,6 +71,7 @@ export default function CreatePoll() {
               <h2>Create Your Poll</h2>
               <p>Create and share polls in seconds</p>
             </div>
+
             <div className="form-section">
               <label>
                 <span className="label-text">Poll Question</span>
@@ -71,6 +85,7 @@ export default function CreatePoll() {
                 />
               </label>
             </div>
+
             <div className="form-section">
               <label>
                 <span className="label-text">Poll Options</span>
@@ -89,6 +104,42 @@ export default function CreatePoll() {
                 </div>
               </label>
             </div>
+
+            {/* ✅ Settings Section */}
+            <div className="form-section">
+              <label className="checkbox-label">
+                <input
+                  type="checkbox"
+                  checked={ipRestriction}
+                  onChange={e => setIpRestriction(e.target.checked)}
+                />
+                Prevent duplicate votes by IP
+              </label>
+
+              <label className="checkbox-label">
+                <input
+                  type="checkbox"
+                  checked={tokenVoting}
+                  onChange={e => setTokenVoting(e.target.checked)}
+                />
+                Enable token-based voting
+              </label>
+
+              {tokenVoting && (
+                <label>
+                  <span className="label-text">Number of tokens</span>
+                  <input
+                    type="number"
+                    min="1"
+                    value={tokenCount}
+                    onChange={e => setTokenCount(parseInt(e.target.value))}
+                    className="poll-input"
+                    required
+                  />
+                </label>
+              )}
+            </div>
+
             <div className="form-actions">
               <button type="button" onClick={addOption} className="add-btn">
                 <span className="btn-icon">+</span>
