@@ -310,6 +310,7 @@
   letter-spacing: 0.5px;
   transition: border-color 0.3s;
   outline: none;
+  margin: 10px;
 }
 
 .poll-code-input:focus {
