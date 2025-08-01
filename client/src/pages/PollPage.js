@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { getPoll, votePoll } from '../services/api';
 import '../styles/PollPage.css';
@@ -11,6 +11,9 @@ export default function PollPage() {
   const [message, setMessage] = useState('');
   const [voted, setVoted] = useState(false);
   const [token, setToken] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const tokenInputRef = useRef(null);
 
   useEffect(() => {
     getPoll(id)
@@ -18,25 +21,53 @@ export default function PollPage() {
       .catch(() => setMessage('Poll not found'));
   }, [id]);
 
+  useEffect(() => {
+    if (poll?.settings?.tokenVoting && tokenInputRef.current) {
+      tokenInputRef.current.focus();
+    }
+  }, [poll]);
+
   const handleVote = async () => {
+    if (selected === null) return;
+
+    setLoading(true);
     try {
       const payload = { optionIndex: selected };
       if (poll.settings?.tokenVoting) {
-        payload.token = token;
+        if (!token.trim()) {
+          setMessage('Token is required to vote.');
+          setLoading(false);
+          return;
+        }
+        payload.token = token.trim();
       }
-      await votePoll(id, payload);
-      setMessage('Thank you for voting!');
+
+      const res = await votePoll(id, payload);
+      setPoll(res.data); // update poll with new vote count
       setVoted(true);
+      setMessage('Thank you for voting!');
     } catch (err) {
-      setMessage('Error voting: ' + (err.response?.data?.error || ''));
+      setMessage('Error voting: ' + (err.response?.data?.error || 'Something went wrong.'));
+    } finally {
+      setLoading(false);
     }
   };
 
   if (!poll) return <div className="poll-page-container">{message || 'Loading poll...'}</div>;
 
+  if (!poll.isOpen) {
+    return (
+      <div className="poll-page-container">
+        <h2 className="poll-header">{poll.question}</h2>
+        <p className="poll-message">This poll is closed.</p>
+      </div>
+    );
+  }
+
   return (
     <div className="poll-page-container">
       <h2 className="poll-header">{poll.question}</h2>
+
       {!voted ? (
         <>
           <div className="options-list">
@@ -54,6 +85,7 @@ export default function PollPage() {
           {poll.settings?.tokenVoting && (
             <div className="token-input-wrapper">
               <input
+                ref={tokenInputRef}
                 type="text"
                 placeholder="Enter your token"
                 value={token}
@@ -63,8 +95,12 @@ export default function PollPage() {
             </div>
           )}
 
-          <button className="vote-btn" onClick={handleVote} disabled={selected === null}>
-            Vote
+          <button
+            className="vote-btn"
+            onClick={handleVote}
+            disabled={selected === null || loading}
+          >
+            {loading ? 'Submitting...' : 'Vote'}
           </button>
         </>
       ) : (
@@ -72,6 +108,7 @@ export default function PollPage() {
           <span role="img" aria-label="thanks">🎉</span> Thank you for voting!
         </div>
       )}
+
       {message && <p className="poll-message">{message}</p>}
     </div>
   );
