@@ -318,34 +318,11 @@
   border-color: #764ba2;
   box-shadow: 0 0 0 2px rgba(118, 75, 162, 0.12);
 }
+
 .toggle-input {
-  appearance: none; /* Remove default style */
-  width: 20px;
-  height: 20px;
-  border: 2px solid #999;
-  border-radius: 4px;
-  background-color: #fff;
-  cursor: pointer;
-  transition: all 0.2s ease;
   margin: 10px;
-  position: relative;
-}
 
-/* Add custom checkmark */
-.toggle-input:checked::after {
-  content: '✓';
-  position: absolute;
-  top: 1px;
-  left: 4px;
-  font-size: 16px;
-  color: #2c7a7b;
 }
-
-/* Optional: hover effect */
-.toggle-input:hover {
-  border-color: #2c7a7b;
-}
-
 
 .toggle-label {
   color: #6E65C6;
