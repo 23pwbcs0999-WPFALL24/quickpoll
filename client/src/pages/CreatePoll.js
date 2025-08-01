@@ -1,106 +1,93 @@
 import React, { useState } from 'react';
-import '../styles/CreatePoll.css';
 import { createPoll } from '../services/api';
+import { useNavigate } from 'react-router-dom';
+import '../styles/CreatePoll.css';
 
 export default function CreatePoll() {
   const [question, setQuestion] = useState('');
-  const [options, setOptions] = useState(['', '', '']);
-  const [tokenVoting, setTokenVoting] = useState(true); // default ON
-  const [ipRestriction, setIpRestriction] = useState(false);
+  const [options, setOptions] = useState(['', '']);
   const [message, setMessage] = useState('');
-  const [pollLink, setPollLink] = useState('');
-  const [pollCode, setPollCode] = useState('');
-  const [copied, setCopied] = useState(false);
-  const [copiedCode, setCopiedCode] = useState(false);
+  const [pollData, setPollData] = useState(null);
+  const [tokenEnabled, setTokenEnabled] = useState(false);
+  const [tokenCount, setTokenCount] = useState(10);
 
-  const handleOptionChange = (idx, value) => {
+  const navigate = useNavigate();
+
+  const handleOptionChange = (index, value) => {
     const newOptions = [...options];
-    newOptions[idx] = value;
+    newOptions[index] = value;
     setOptions(newOptions);
   };
 
-  const addOption = () => setOptions([...options, '']);
+  const handleAddOption = () => {
+    if (options.length >= 10) return;
+    setOptions([...options, '']);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!question.trim() || options.filter(opt => opt.trim()).length < 2) {
+      setMessage('Please enter a question and at least two valid options.');
+      return;
+    }
+
     try {
-      const payload = {
+      const response = await createPoll({
         question,
         options,
         settings: {
-          tokenVoting,
-          ipRestriction,
-        },
-      };
-      const res = await createPoll(payload);
-      const pollId = res.data.pollId;
-      const link = `${window.location.origin}/poll/${pollId}`;
-      setPollLink(link);
-      setPollCode(pollId);
-      setMessage('Poll created successfully!');
+          ipRestriction: true,
+          tokenVoting: tokenEnabled,
+          tokenCount: tokenEnabled ? tokenCount : undefined
+        }
+      });
+      setPollData(response.data);
+      setMessage('');
     } catch (err) {
-      setMessage('Error creating poll');
+      setMessage('Error creating poll: ' + (err.response?.data?.error || ''));
     }
   };
 
-  const handleCopy = () => {
-    if (pollLink) {
-      navigator.clipboard.writeText(pollLink);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1500);
-    }
-  };
-
-  const handleCopyCode = () => {
-    if (pollCode) {
-      navigator.clipboard.writeText(pollCode);
-      setCopiedCode(true);
-      setTimeout(() => setCopiedCode(false), 1500);
-    }
+  const handleCopy = (text) => {
+    navigator.clipboard.writeText(text);
   };
 
   return (
     <div className="create-poll-page">
       <div className="create-poll-container">
         <div className="form-wrapper">
-          <form className="create-poll-form" onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} className="create-poll-form">
             <div className="form-header">
-              <h2>Create Your Poll</h2>
-              <p>Create and share polls in seconds</p>
+              <h2>Create a New Poll</h2>
+              <p>Get instant votes with secure access</p>
             </div>
 
             <div className="form-section">
-              <label>
-                <span className="label-text">Poll Question</span>
-                <input
-                  type="text"
-                  value={question}
-                  onChange={e => setQuestion(e.target.value)}
-                  required
-                  className="poll-input"
-                  placeholder="What would you like to ask?"
-                />
-              </label>
+              <label className="label-text">Question</label>
+              <input
+                type="text"
+                value={question}
+                onChange={(e) => setQuestion(e.target.value)}
+                placeholder="Type your question here"
+                className="poll-input"
+              />
             </div>
 
             <div className="form-section">
-              <label>
-                <span className="label-text">Poll Options</span>
-                <div className="options-list">
-                  {options.map((opt, idx) => (
-                    <input
-                      key={idx}
-                      type="text"
-                      placeholder={`Option ${idx + 1}`}
-                      value={opt}
-                      onChange={e => handleOptionChange(idx, e.target.value)}
-                      required
-                      className="poll-input"
-                    />
-                  ))}
-                </div>
-              </label>
-              <button type="button" onClick={addOption} className="add-btn">
+              <label className="label-text">Options</label>
+              <div className="options-list">
+                {options.map((option, idx) => (
+                  <input
+                    key={idx}
+                    type="text"
+                    value={option}
+                    onChange={(e) => handleOptionChange(idx, e.target.value)}
+                    placeholder={`Option ${idx + 1}`}
+                    className="poll-input"
+                  />
+                ))}
+              </div>
+              <button type="button" className="add-btn" onClick={handleAddOption}>
                 <span className="btn-icon">+</span> Add Option
               </button>
             </div>
@@ -109,73 +96,95 @@ export default function CreatePoll() {
               <label className="toggle-label">
                 <input
                   type="checkbox"
-                  checked={tokenVoting}
-                  onChange={e => setTokenVoting(e.target.checked)}
+                  checked={tokenEnabled}
+                  onChange={() => setTokenEnabled(!tokenEnabled)}
+                  className="toggle-input"
                 />
-                Enable Token Voting (only users with tokens can vote)
+                Enable token-based voting
               </label>
-              <label className="toggle-label">
-                <input
-                  type="checkbox"
-                  checked={ipRestriction}
-                  onChange={e => setIpRestriction(e.target.checked)}
-                />
-                Restrict by IP (prevent votes from same IP)
-              </label>
+
+              {tokenEnabled && (
+                <div style={{ marginTop: '1rem' }}>
+                  <label className="label-text">Number of Tokens</label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="100"
+                    value={tokenCount}
+                    onChange={(e) => setTokenCount(Number(e.target.value))}
+                    className="poll-input"
+                    placeholder="Enter number of tokens"
+                  />
+                </div>
+              )}
             </div>
 
             <div className="form-actions">
-              <button type="submit" className="submit-btn">
-                <span className="btn-icon">🚀</span> Create Poll
-              </button>
+              <button type="submit" className="submit-btn">Create Poll</button>
             </div>
+
+            {message && (
+              <div className="message-container">
+                <p className="poll-message">{message}</p>
+              </div>
+            )}
           </form>
 
-          {pollCode && (
-            <div className="poll-code-container">
-              <div className="poll-code-label">Poll Code (share this code to join):</div>
-              <div className="poll-code-box">
-                <input
-                  type="text"
-                  value={pollCode}
-                  readOnly
-                  className="poll-code-input"
-                  onFocus={e => e.target.select()}
-                />
-                <button className="copy-btn" onClick={handleCopyCode} type="button">
-                  {copiedCode ? 'Copied!' : 'Copy Code'}
-                </button>
+          {pollData && (
+            <>
+              <div className="poll-link-container">
+                <div className="poll-link-label">Your Poll Link</div>
+                <div className="poll-link-box">
+                  <input
+                    type="text"
+                    readOnly
+                    value={`${window.location.origin}/poll/${pollData.pollId}`}
+                    className="poll-link-input"
+                  />
+                  <button className="copy-btn" onClick={() => handleCopy(`${window.location.origin}/poll/${pollData.pollId}`)}>Copy</button>
+                </div>
               </div>
-            </div>
-          )}
 
-          {pollLink && (
-            <div className="poll-link-container">
-              <div className="poll-link-label">Or share this link:</div>
-              <div className="poll-link-box">
-                <input
-                  type="text"
-                  value={pollLink}
-                  readOnly
-                  className="poll-link-input"
-                  onFocus={e => e.target.select()}
-                />
-                <button className="copy-btn" onClick={handleCopy} type="button">
-                  {copied ? 'Copied!' : 'Copy Link'}
-                </button>
+              <div className="poll-code-container">
+                <div className="poll-code-label">Poll Code</div>
+                <div className="poll-code-box">
+                  <input
+                    type="text"
+                    readOnly
+                    value={pollData.pollId}
+                    className="poll-code-input"
+                  />
+                  <button className="copy-btn" onClick={() => handleCopy(pollData.pollId)}>Copy</button>
+                </div>
               </div>
-            </div>
-          )}
 
-          {message && !pollLink && (
-            <div className="message-container">
-              <p className="poll-message">{message}</p>
-            </div>
+              {pollData.settings.tokenVoting && pollData.settings.tokens?.length > 0 && (
+                <div className="poll-code-container">
+                  <div className="poll-code-label">Voting Tokens</div>
+                  <div className="poll-code-box" style={{ flexDirection: 'column', alignItems: 'stretch' }}>
+                    <textarea
+                      readOnly
+                      rows="6"
+                      value={pollData.settings.tokens.join('\n')}
+                      style={{
+                        width: '100%',
+                        fontFamily: 'monospace',
+                        fontSize: '0.9rem',
+                        padding: '1rem',
+                        borderRadius: '8px',
+                        border: '1px solid #ccc',
+                        resize: 'vertical',
+                        marginBottom: '1rem'
+                      }}
+                    />
+                    <button className="copy-btn" onClick={() => handleCopy(pollData.settings.tokens.join('\n'))}>
+                      Copy All Tokens
+                    </button>
+                  </div>
+                </div>
+              )}
+            </>
           )}
-
-          <div className="info-note">
-            <p>💡 After creating a poll, share the code or link above so others can join and vote!</p>
-          </div>
         </div>
       </div>
     </div>
