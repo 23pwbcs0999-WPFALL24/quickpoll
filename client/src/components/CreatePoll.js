@@ -118,72 +118,95 @@ const CreatePoll = () => {
           )}
         </div>
 
-        <div className="settings-section">
-          <h3 style={{ marginBottom: '10px' }}>Poll Settings</h3>
+<div
+  style={{
+    border: '1px solid #ccc',
+    borderRadius: '8px',
+    padding: '20px',
+    marginTop: '20px',
+    backgroundColor: '#f9f9f9'
+  }}
+>
+  <h3 style={{ marginBottom: '15px', fontSize: '20px' }}>Poll Settings</h3>
 
-          <div style={{ display: 'flex', alignItems: 'center', marginBottom: '12px' }}>
-            <input
-              type="checkbox"
-              id="ip-restriction"
-              checked={pollData.settings.ipRestriction}
-              onChange={(e) => setPollData({
-                ...pollData,
-                settings: { ...pollData.settings, ipRestriction: e.target.checked }
-              })}
-              style={{ marginRight: '10px', width: '18px', height: '18px' }}
-            />
-            <label htmlFor="ip-restriction" style={{ fontSize: '16px' }}>
-              Enable IP-based restriction
-            </label>
-          </div>
+  {/* IP Restriction */}
+  <div style={{ display: 'flex', alignItems: 'center', marginBottom: '15px' }}>
+    <input
+      type="checkbox"
+      id="ip-restriction"
+      checked={pollData.settings.ipRestriction}
+      onChange={(e) =>
+        setPollData({
+          ...pollData,
+          settings: {
+            ...pollData.settings,
+            ipRestriction: e.target.checked
+          }
+        })
+      }
+      style={{ marginRight: '10px', width: '18px', height: '18px' }}
+    />
+    <label htmlFor="ip-restriction" style={{ fontSize: '16px' }}>
+      Restrict voting to one vote per IP
+    </label>
+  </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
-              <input
-                type="checkbox"
-                id="token-voting"
-                checked={pollData.settings.tokenVoting}
-                onChange={(e) => setPollData({
-                  ...pollData,
-                  settings: { ...pollData.settings, tokenVoting: e.target.checked }
-                })}
-                style={{ marginRight: '10px', width: '18px', height: '18px' }}
-              />
-              <label htmlFor="token-voting" style={{ fontSize: '16px' }}>
-                Enable token-based voting
-              </label>
-            </div>
+  {/* Token-based Voting */}
+  <div style={{ display: 'flex', flexDirection: 'column' }}>
+    <div style={{ display: 'flex', alignItems: 'center' }}>
+      <input
+        type="checkbox"
+        id="token-voting"
+        checked={pollData.settings.tokenVoting}
+        onChange={(e) =>
+          setPollData({
+            ...pollData,
+            settings: {
+              ...pollData.settings,
+              tokenVoting: e.target.checked
+            }
+          })
+        }
+        style={{ marginRight: '10px', width: '18px', height: '18px' }}
+      />
+      <label htmlFor="token-voting" style={{ fontSize: '16px' }}>
+        Enable token-based voting
+      </label>
+    </div>
 
-            {pollData.settings.tokenVoting && (
-              <div style={{ marginLeft: '28px' }}>
-                <label htmlFor="token-count" style={{ fontSize: '15px', marginRight: '10px' }}>
-                  Number of tokens:
-                </label>
-                <input
-                  id="token-count"
-                  type="number"
-                  min="1"
-                  max="100"
-                  value={pollData.settings.tokenCount}
-                  onChange={(e) => setPollData({
-                    ...pollData,
-                    settings: {
-                      ...pollData.settings,
-                      tokenCount: Math.max(1, Math.min(100, parseInt(e.target.value) || 10))
-                    }
-                  })}
-                  style={{
-                    padding: '6px 10px',
-                    borderRadius: '5px',
-                    border: '1px solid #ccc',
-                    width: '80px',
-                    fontSize: '15px'
-                  }}
-                />
-              </div>
-            )}
-          </div>
-        </div>
+    {pollData.settings.tokenVoting && (
+      <div style={{ marginTop: '10px', marginLeft: '28px' }}>
+        <label htmlFor="token-count" style={{ fontSize: '15px', marginRight: '10px' }}>
+          Number of tokens:
+        </label>
+        <input
+          id="token-count"
+          type="number"
+          min="1"
+          max="100"
+          value={pollData.settings.tokenCount}
+          onChange={(e) =>
+            setPollData({
+              ...pollData,
+              settings: {
+                ...pollData.settings,
+                tokenCount: Math.max(1, Math.min(100, parseInt(e.target.value) || 10))
+              }
+            })
+          }
+          style={{
+            padding: '6px 10px',
+            borderRadius: '5px',
+            border: '1px solid #ccc',
+            width: '80px',
+            fontSize: '15px'
+          }}
+        />
+      </div>
+    )}
+  </div>
+</div>
+
 
         <button type="submit" className="submit-btn">
           Create Poll
