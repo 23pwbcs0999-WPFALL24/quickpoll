@@ -84,14 +84,24 @@ export default function PollPage() {
 
           {poll.settings?.tokenVoting && (
             <div className="token-input-wrapper">
-              <input
-                ref={tokenInputRef}
-                type="text"
-                placeholder="Enter your token"
-                value={token}
-                onChange={e => setToken(e.target.value)}
-                className="token-input"
-              />
+<input
+  ref={tokenInputRef}
+  type="text"
+  placeholder="Enter your token"
+  value={token}
+  onChange={e => setToken(e.target.value)}
+  style={{
+    padding: '10px 12px',
+    fontSize: '16px',
+    border: '1px solid #ccc',
+    borderRadius: '8px',
+    width: '100%',
+    maxWidth: '300px',
+    boxSizing: 'border-box',
+    marginBottom: '1rem'
+  }}
+/>
+
             </div>
           )}
 
