@@ -5,16 +5,13 @@ import { createPoll } from '../services/api';
 export default function CreatePoll() {
   const [question, setQuestion] = useState('');
   const [options, setOptions] = useState(['', '', '']);
+  const [tokenVoting, setTokenVoting] = useState(true); // default ON
+  const [ipRestriction, setIpRestriction] = useState(false);
   const [message, setMessage] = useState('');
   const [pollLink, setPollLink] = useState('');
   const [pollCode, setPollCode] = useState('');
   const [copied, setCopied] = useState(false);
   const [copiedCode, setCopiedCode] = useState(false);
-
-  // ✅ New: settings states
-  const [ipRestriction, setIpRestriction] = useState(false);
-  const [tokenVoting, setTokenVoting] = useState(false);
-  const [tokenCount, setTokenCount] = useState(10);
 
   const handleOptionChange = (idx, value) => {
     const newOptions = [...options];
@@ -27,15 +24,15 @@ export default function CreatePoll() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await createPoll({
+      const payload = {
         question,
         options,
         settings: {
-          ipRestriction,
           tokenVoting,
-          tokenCount: tokenVoting ? tokenCount : 0,
-        }
-      });
+          ipRestriction,
+        },
+      };
+      const res = await createPoll(payload);
       const pollId = res.data.pollId;
       const link = `${window.location.origin}/poll/${pollId}`;
       setPollLink(link);
@@ -103,51 +100,33 @@ export default function CreatePoll() {
                   ))}
                 </div>
               </label>
+              <button type="button" onClick={addOption} className="add-btn">
+                <span className="btn-icon">+</span> Add Option
+              </button>
             </div>
 
-            {/* ✅ Settings Section */}
             <div className="form-section">
-              <label className="checkbox-label">
-                <input
-                  type="checkbox"
-                  checked={ipRestriction}
-                  onChange={e => setIpRestriction(e.target.checked)}
-                />
-                Prevent duplicate votes by IP
-              </label>
-
-              <label className="checkbox-label">
+              <label className="toggle-label">
                 <input
                   type="checkbox"
                   checked={tokenVoting}
                   onChange={e => setTokenVoting(e.target.checked)}
                 />
-                Enable token-based voting
+                Enable Token Voting (only users with tokens can vote)
               </label>
-
-              {tokenVoting && (
-                <label>
-                  <span className="label-text">Number of tokens</span>
-                  <input
-                    type="number"
-                    min="1"
-                    value={tokenCount}
-                    onChange={e => setTokenCount(parseInt(e.target.value))}
-                    className="poll-input"
-                    required
-                  />
-                </label>
-              )}
+              <label className="toggle-label">
+                <input
+                  type="checkbox"
+                  checked={ipRestriction}
+                  onChange={e => setIpRestriction(e.target.checked)}
+                />
+                Restrict by IP (prevent votes from same IP)
+              </label>
             </div>
 
             <div className="form-actions">
-              <button type="button" onClick={addOption} className="add-btn">
-                <span className="btn-icon">+</span>
-                Add Option
-              </button>
               <button type="submit" className="submit-btn">
-                <span className="btn-icon">🚀</span>
-                Create Poll
+                <span className="btn-icon">🚀</span> Create Poll
               </button>
             </div>
           </form>

@@ -10,6 +10,7 @@ export default function PollPage() {
   const [selected, setSelected] = useState(null);
   const [message, setMessage] = useState('');
   const [voted, setVoted] = useState(false);
+  const [token, setToken] = useState('');
 
   useEffect(() => {
     getPoll(id)
@@ -19,12 +20,13 @@ export default function PollPage() {
 
   const handleVote = async () => {
     try {
-      await votePoll(id, { optionIndex: selected });
+      const payload = { optionIndex: selected };
+      if (poll.settings?.tokenVoting) {
+        payload.token = token;
+      }
+      await votePoll(id, payload);
       setMessage('Thank you for voting!');
       setVoted(true);
-      // Optionally, refresh poll data if you want to update vote counts
-      // const res = await getPoll(id);
-      // setPoll(res.data);
     } catch (err) {
       setMessage('Error voting: ' + (err.response?.data?.error || ''));
     }
@@ -48,6 +50,19 @@ export default function PollPage() {
               </button>
             ))}
           </div>
+
+          {poll.settings?.tokenVoting && (
+            <div className="token-input-wrapper">
+              <input
+                type="text"
+                placeholder="Enter your token"
+                value={token}
+                onChange={e => setToken(e.target.value)}
+                className="token-input"
+              />
+            </div>
+          )}
+
           <button className="vote-btn" onClick={handleVote} disabled={selected === null}>
             Vote
           </button>
