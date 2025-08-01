@@ -9,6 +9,7 @@ export default function CreatePoll() {
   const [pollData, setPollData] = useState(null);
   const [tokenEnabled, setTokenEnabled] = useState(false);
   const [tokenCount, setTokenCount] = useState(10);
+  const [ipRestricted, setIpRestricted] = useState(false); // ← NEW STATE
 
   const handleOptionChange = (index, value) => {
     const newOptions = [...options];
@@ -36,7 +37,7 @@ export default function CreatePoll() {
         question,
         options: validOptions,
         settings: {
-          ipRestriction: true,
+          ipRestriction: ipRestricted,
           tokenVoting: tokenEnabled,
           tokenCount: tokenEnabled ? tokenCount : undefined
         }
@@ -88,6 +89,18 @@ export default function CreatePoll() {
             <button type="button" className="add-btn" onClick={handleAddOption}>
               <span className="btn-icon">+</span> Add Option
             </button>
+          </div>
+
+          <div className="form-section">
+            <label className="toggle-label">
+              <input
+                type="checkbox"
+                checked={ipRestricted}
+                onChange={() => setIpRestricted(prev => !prev)}
+                className="toggle-input"
+              />
+              Enable IP-based restriction
+            </label>
           </div>
 
           <div className="form-section">

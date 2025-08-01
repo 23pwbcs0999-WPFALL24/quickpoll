@@ -2,7 +2,6 @@ const { v4: uuidv4 } = require('uuid');
 const Poll = require('../models/Poll');
 const { generateTokens } = require('../utils/tokenGenerator');
 
-
 // CREATE POLL
 exports.createPoll = async (req, res) => {
   const { question, options, settings } = req.body;
@@ -14,6 +13,7 @@ exports.createPoll = async (req, res) => {
     }
 
     const tokenVotingEnabled = settings?.tokenVoting || false;
+    const ipRestrictionEnabled = settings?.ipRestriction || false;
     const tokenCount = settings?.tokenCount || 10;
 
     const newPoll = new Poll({
@@ -21,7 +21,7 @@ exports.createPoll = async (req, res) => {
       options: options.map(option => ({ text: option })),
       pollId: uuidv4(),
       settings: {
-        ipRestriction: settings?.ipRestriction || false,
+        ipRestriction: ipRestrictionEnabled,
         tokenVoting: tokenVotingEnabled,
         tokens: tokenVotingEnabled ? generateTokens(tokenCount) : []
       }
